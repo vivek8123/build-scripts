@@ -28,14 +28,14 @@ yum install -y git gcc gcc-c++ python-devel gzip tar make wget xz cmake yum-util
     openblas-devel bzip2-devel bzip2 zip unzip libffi-devel zlib-devel autoconf \
     automake libtool cargo pkgconf-pkg-config.ppc64le info.ppc64le fontconfig.ppc64le \
     fontconfig-devel.ppc64le sqlite-devel
+    
+# Set the RELEASE_VERSION environment variable
+export RELEASE_VERSION=$PACKAGE_VERSION
 
 # Clone the repository
 git clone $PACKAGE_URL
 cd $PACKAGE_DIR
 git checkout $PACKAGE_VERSION
-
-# Set the RELEASE_VERSION environment variable
-export RELEASE_VERSION=${PACKAGE_VERSION}
 
 # Install test dependencies
 pip3 install -r requirements_test.txt
