@@ -22,6 +22,7 @@ PACKAGE_NAME=import-tracker
 PACKAGE_VERSION=${1:-3.2.1}
 PACKAGE_URL=https://github.com/IBM/import-tracker.git
 PACKAGE_DIR=import-tracker
+CURRENT_DIR="${PWD}"
 
 # Install necessary system packages
 yum install -y git gcc gcc-c++ python-devel gzip tar make wget xz cmake yum-utils openssl-devel \
@@ -29,13 +30,13 @@ yum install -y git gcc gcc-c++ python-devel gzip tar make wget xz cmake yum-util
     automake libtool cargo pkgconf-pkg-config.ppc64le info.ppc64le fontconfig.ppc64le \
     fontconfig-devel.ppc64le sqlite-devel
     
-# Set the RELEASE_VERSION environment variable
-export RELEASE_VERSION=$PACKAGE_VERSION
-
 # Clone the repository
 git clone $PACKAGE_URL
 cd $PACKAGE_DIR
 git checkout $PACKAGE_VERSION
+
+# Set the RELEASE_VERSION environment variable
+export RELEASE_VERSION=$PACKAGE_VERSION
 
 # Install test dependencies
 pip3 install -r requirements_test.txt
@@ -49,6 +50,10 @@ if ! (pip3 install .); then
     echo "$PACKAGE_NAME | $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail | Installation_Failure"
     exit 1
 fi
+
+#creating Wheel through script because we need to Read version from the env.
+pip install build wheel
+python3 setup.py bdist_wheel --dist-dir="$CURRENT_DIR/"
 
 # Run tests(skipping some testcase as same testcase failing in x86)
 if !  pytest -k "not(test_track_module_with_package or test_track_module_recursive or test_track_module_with_limited_submodules or test_with_limited_submodules or test_detect_transitive_with_nested_module or test_detect_transitive_with_nested_module_full_depth or test_all_import_types or test_missing_parent_mod or test_without_package or test_with_package or test_with_logging or test_parse_requirements_happy_file or test_parse_requirements_happy_iterable[list] or test_parse_requirements_happy_iterable[tuple] or test_parse_requirements_happy_iterable[set] or test_parse_requirements_add_untracked_reqs or test_parse_requirements_add_subset_of_submodules or test_parse_requirements_unknown_extras or test_nested_deps or test_track_module_programmatic)"; then
